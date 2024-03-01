@@ -1,12 +1,20 @@
+"use client";
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
+import PopupModal from "./PopupModal";
 
 export default function Home() {
+  const [isOpenPopup, setIsOpenPopup] = useState(true);
   return (
     <main className="min-h-screen p-6 flex flex-col">
       <div className="header flex justify-between items-center shadow-md shadow-indigo-500/50 px-4 py-6">
         <h1 className="capitalize font-bold text-3xl">booking app</h1>
-        <Button className="capitalize text-xl" variant="outlined">
+        <Button
+          className="capitalize text-lg"
+          variant="outlined"
+          onClick={() => setIsOpenPopup(!isOpenPopup)}
+        >
           Login / Sign Up
         </Button>
       </div>
@@ -23,6 +31,7 @@ export default function Home() {
           Mihir Rane
         </Link>
       </div>
+      <PopupModal isOpenPopup={isOpenPopup} setIsOpenPopup={setIsOpenPopup} />
     </main>
   );
 }
