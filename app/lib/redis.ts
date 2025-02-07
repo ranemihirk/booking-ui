@@ -13,7 +13,7 @@ export async function createUser(formData) {
       bills: JSON.stringify([]),
     };
 
-    if (fetchUser(email)) {
+    if (isUserExists(email)) {
       const client = await clientPromise;
       const db = client.db("booking");
       const collection = db.collection("users");
@@ -25,13 +25,13 @@ export async function createUser(formData) {
         createdAt: new Date(),
       });
       // const result = await client.hSet(`users:${userData.email}`, userData);
-console.log('result: ', result);
+      console.log("result: ", result);
       return {
         message: {
           status: "success",
           data: {
             name,
-        email,
+            email,
           },
         },
       };
@@ -43,19 +43,21 @@ console.log('result: ', result);
   }
 }
 
-// export async function fetchUser(email) {
-//   try {
-//     const result = await client.hGetAll(`users:${email}`);
-//     if (!result || Object.keys(result).length === 0) {
-//       return { error: "No such user." };
-//     }
-//     return { message: { status: "success", data: { ...result } } };
-//   } catch (e) {
-//     return { error: e };
-//   }
-// }
-
 export async function fetchUser(email) {
+  try {
+    const result = await isUserExists(email);
+    if (!result) {
+      return { error: "No such user." };
+    }
+    return {
+      message: { status: "success", data: result },
+    };
+  } catch (e) {
+    return { error: e };
+  }
+}
+
+export async function isUserExists(email) {
   let userExists = null;
   const client = await clientPromise;
   const db = client.db("booking");
@@ -66,7 +68,12 @@ export async function fetchUser(email) {
   if (users.length > 0) {
     users.map((user) => {
       if (user.email == email) {
-        userExists = user;
+        userExists = {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          password: user.password,
+        };
       }
     });
   }

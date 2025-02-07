@@ -46,18 +46,14 @@ export default function Header() {
           <Tooltip title="Account settings">
             <IconButton
               onClick={handleClick}
-              size="small"
               aria-controls={open ? "account-menu" : undefined}
               aria-haspopup="true"
               aria-expanded={open ? "true" : undefined}
+              className="size-auto"
             >
-              {!user ? (
-                <Avatar className="bg-dark/80" />
-              ) : (
-                <Avatar className="capitalize bg-dark/80">
-                  {user.name.charAt(0)}{" "}
-                </Avatar>
-              )}
+              <Avatar className="capitalize bg-dark/80 shadow-inner shadow-blue text-[100%]">
+                {user.name.charAt(0)}{" "}
+              </Avatar>
             </IconButton>
           </Tooltip>
         )}
@@ -99,17 +95,17 @@ export default function Header() {
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
-          <MenuItem onClick={handleClose}>
+          <MenuItem onClick={handleClose} className="bg-dark/80 text-light">
             <Avatar className="bg-dark/80" /> Profile
           </MenuItem>
-          <Divider />
+          <Divider className="m-0" />
 
           <MenuItem
             onClick={() => {
               logoutUser();
               createToast("Logout Successful.", "success");
             }}
-            className={`${!user && "hidden"}`}
+            className="bg-dark/80 text-light"
           >
             <ListItemIcon className="bg-dark/80 min-w-fit p-2 text-light rounded-full mr-2">
               <FontAwesomeIcon icon={faPowerOff} />

@@ -46,14 +46,19 @@ export default function AuthContextProvider({
       if (!cookieAge) {
         const data = await fetchUser(cookie);
         console.log("data: ", data);
-        if (!data) return;
+        if (data.error) {
+          return;
+        }
 
-        const currentUser = {
-          id: data._id,
-          name: data.name,
-          email: data.email,
-        };
-        loginUser(currentUser);
+        if (data.message) {
+          const userData = data.message.data;
+          const currentUser = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+          };
+          loginUser(currentUser);
+        }
       } else {
         logoutUser();
       }

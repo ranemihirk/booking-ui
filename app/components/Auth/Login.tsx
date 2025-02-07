@@ -20,7 +20,7 @@ export default function Login({ open, setOpen }: LoginProps) {
 
   const [error, setError] = useState(null);
 
-  async function handleAddRentSubmit(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     const toastId = createToast("Logging in...", "info");
     if (emailRef.current && passwordRef.current) {
       const result = await signin({}, formData);
@@ -38,11 +38,12 @@ export default function Login({ open, setOpen }: LoginProps) {
           updateToast("Something went wrong!", "error", toastId);
           return;
         }
+        console.log('response: ', response);
 
         if (response.message) {
           const userData = response.message.data;
           const currentUser = {
-            id: userData._id,
+            id: userData.id,
             name: userData.name,
             email: userData.email,
           };
@@ -61,7 +62,7 @@ export default function Login({ open, setOpen }: LoginProps) {
   }
   return (
     <div>
-      <form action={handleAddRentSubmit}>
+      <form action={handleSubmit}>
         <input
           className="w-full h-8 p-2 my-3 rounded"
           type="email"
