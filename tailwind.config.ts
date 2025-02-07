@@ -1,15 +1,23 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   important: true,
-	darkMode: 'class',
   theme: {
+    container: {
+      center: true,
+      padding: "1rem", // Default padding
+    },
     extend: {
+      colors: {
+        light: colors.neutral[50],
+        dark: colors.zinc[900],
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
