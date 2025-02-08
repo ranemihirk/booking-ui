@@ -9,22 +9,37 @@ import Typography from "@mui/material/Typography";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
 import CalendarPopupModal from "@/components/Calendar/CalendarPopupModal";
+import { fetchAllEvents } from "@/lib/redis";
+import { EventProp } from "@/lib/types";
 
+type EventInfoProp = {
+  id: string;
+  title: string;
+  start: string;
+};
+
+const defaultEvent = {
+  id: "1",
+  title: "event 1",
+  date: "2025-02-15",
+};
 export default function DefaultCalendar() {
   const [open, setOpen] = useState(false);
   const [popupType, setPopupType] = useState("");
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [eventInfo, setEventInfo] = useState<{
-    id: string;
-    title: string;
-    date: string;
-  } | null>(null);
+  const [events, setEvents] = useState<EventProp[]>([]);
+  const [eventInfo, setEventInfo] = useState<EventInfoProp | null>(null);
 
   const calendarRef = useRef(null);
 
   const handleDateClick = (arg) => {
     console.log("handleDateClick: ", arg);
-    alert(arg.dateStr);
+    setOpen(true);
+    setEventInfo({
+      id: "",
+      title: "",
+      start: arg.dateStr,
+    });
   };
 
   const handleEventClick = (event) => {
@@ -35,7 +50,7 @@ export default function DefaultCalendar() {
     setEventInfo({
       id: event.event.id,
       title: event.event.title,
-      date: event.event.start?.toLocaleDateString() || "",
+      start: event.event.start?.toLocaleDateString() || "",
     });
     setAnchorEl(event.el); // Attach popover to the clicked event
   };
@@ -45,9 +60,29 @@ export default function DefaultCalendar() {
     setAnchorEl(null);
   };
 
+  const handleEditEvent = () => {
+    setOpen(true);
+    setAnchorEl(null);
+  };
+
   useEffect(() => {
-    console.log("eventInfo: ", eventInfo);
-  }, [eventInfo]);
+    const init = async () => {
+      const allEvents = await fetchAllEvents();
+
+      if (allEvents.error) {
+        return;
+      }
+
+      if (allEvents.message) {
+        setEvents(allEvents.message.data);
+      }
+    };
+    init();
+  }, []);
+
+  useEffect(() => {
+    console.log("events: ", events);
+  }, [events]);
 
   return (
     <>
@@ -55,26 +90,19 @@ export default function DefaultCalendar() {
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        events={[
-          {
-            id: "1",
-            title: "event 1",
-            date: "2025-02-15",
-            textColor: "black",
-            backgroundColor: "orange",
-          },
-          { id: "2", title: "event 2", date: "2025-02-17" },
-          { id: "3", title: "event 3", date: "2025-02-15" },
-          { id: "4", title: "event 4", date: "2025-02-15" },
-        ]}
+        validRange={{
+          start: new Date(), // Disables past dates
+        }}
+        events={events}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
       />
       <CalendarPopupModal
         open={open}
         setOpen={setOpen}
-        popupType={popupType}
-        setPopupType={setPopupType}
+        eventInfo={eventInfo}
+        events={events}
+        setEvents={setEvents}
       />
       <Popover
         open={Boolean(anchorEl)}
@@ -92,12 +120,30 @@ export default function DefaultCalendar() {
             aria-label="Vertical button group"
             className="w-full bg-dark "
           >
-            <Button className="capitalize text-light border-light">Approve</Button>
-            <Button className="capitalize text-light border-light">Edit</Button>
-            <Button className="capitalize text-light border-light">Delete</Button>
+            <Button className="capitalize text-light border-light">
+              Approve
+            </Button>
+            <Button
+              className="capitalize text-light border-light"
+              onClick={handleEditEvent}
+            >
+              Edit
+            </Button>
+            <Button className="capitalize text-light border-light">
+              Delete
+            </Button>
           </ButtonGroup>
         </Box>
       </Popover>
+    </>
+  );
+}
+
+function renderEventContent(eventInfo) {
+  return (
+    <>
+      <b>{eventInfo.timeText}</b>
+      <i>{eventInfo.event.title}</i>
     </>
   );
 }

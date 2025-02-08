@@ -45,7 +45,6 @@ export default function AuthContextProvider({
       const cookieAge = checkCookieAge("MyBooking");
       if (!cookieAge) {
         const data = await fetchUser(cookie);
-        console.log("data: ", data);
         if (data.error) {
           return;
         }

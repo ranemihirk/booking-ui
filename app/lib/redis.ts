@@ -1,7 +1,9 @@
 "use server";
+import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
 import { v4 as uuidv4 } from "uuid";
 
+// Auth
 export async function createUser(formData) {
   try {
     const { email, name, password } = Object.fromEntries(formData);
@@ -82,48 +84,112 @@ export async function isUserExists(email) {
   return userExists;
 }
 
-// export async function fetchUserBills(email) {
-//   try {
-//     const result = await client.hGetAll(`users:${email}`);
-//     if (!result || (Object.keys(result).length === 0 && result.bills)) {
-//       return { error: "No such user." };
-//     }
-//     const bills = JSON.parse(result.bills);
-//     return { message: { status: "success", data: { ...bills } } };
-//   } catch (e) {
-//     return { error: e };
-//   }
-// }
+// Events
 
-// export async function setUserBills(user, bills) {
-//   try {
-//     const result = await client.hSet(`users:${user.email}`, { bills, ...user });
-//     return { message: { status: "success", data: { result } } };
-//   } catch (e) {
-//     return { error: e };
-//   }
-// }
+export async function fetchAllEvents(propertyId = "") {
+  const client = await clientPromise;
+  const db = client.db("booking");
+  const collection = db.collection("events");
 
-// export async function moveDataToRedis(email, bills) {
-//   try {
-//     const user = await client.hGetAll(`users:${email}`);
-//     const redisBills = JSON.parse(user.bills);
-//     // const allBills = redisBills.concat(bills);
-//     const mergedBills = [
-//       ...redisBills,
-//       ...bills.filter(
-//         (localBill) =>
-//           !redisBills.some((redisBill) => redisBill.id === localBill.id)
-//       ),
-//     ];
-//     const currentUserData = {
-//       ...user,
-//       bills: JSON.stringify(mergedBills),
-//     };
-//     const result = await client.hSet(`users:${user.email}`, currentUserData);
+  const events = await collection.find({}).toArray();
+  if (events.length > 0) {
+    const allEvents = events.map((event) => {
+      return {
+        id: event._id.toString(),
+        title: event.eventName,
+        start: event.start,
+        end: event.end,
+        extendedProps: {
+          numberOPeople: event.numberOfPeople,
+          comments: event.comments,
+          status: event.status,
+        },
+        description: "Test",
+      };
+    });
 
-//     return { message: { status: "success", data: mergedBills } };
-//   } catch (e) {
-//     return { error: e };
-//   }
-// }
+    return {
+      message: {
+        status: "success",
+        data: [...allEvents],
+      },
+    };
+  } else {
+    return { error: "No Events Found!" };
+  }
+}
+
+export async function fetchEvent(eventId, propertyId = "") {
+  const client = await clientPromise;
+  const db = client.db("booking");
+  const collection = db.collection("events");
+  if (eventId != "") {
+    console.log("eventId: ", new Object(eventId));
+    const event = await collection.findOne({ _id: new ObjectId(eventId) });
+    console.log("event: ", event);
+    if (event) {
+      return {
+        message: {
+          status: "success",
+          data: {
+            id: event._id.toString(),
+            title: event.eventName,
+            start: event.start,
+            end: event.end,
+            extendedProps: {
+              numberOPeople: event.numberOfPeople,
+              comments: event.comments,
+              status: event.status,
+            },
+            description: "Test",
+          },
+        },
+      };
+    }
+    else {
+      return { error: "No Events Found!" };
+    }
+  } else {
+    return { error: "No Events Found!" };
+  }
+}
+
+export async function createEvent(formData) {
+  try {
+    const { eventName, numberOfPeople, comments, startDate, endDate, status } =
+      Object.fromEntries(formData);
+    const eventData = {
+      title: eventName,
+      start: startDate,
+      end: endDate,
+      extendedProps: {
+        numberOPeople: numberOfPeople,
+        comments: comments,
+        status: status,
+      },
+    };
+
+    const client = await clientPromise;
+    const db = client.db("booking");
+    const collection = db.collection("events");
+
+    const result = await collection.insertOne({
+      eventName,
+      numberOfPeople,
+      comments,
+      status: 0,
+      start: startDate,
+      end: endDate,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    return {
+      message: {
+        status: "success",
+        data: { id: result.insertedId.toString(), ...eventData },
+      },
+    };
+  } catch (e) {
+    return { error: e };
+  }
+}

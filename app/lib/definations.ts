@@ -28,26 +28,46 @@ export type SignupFormState =
     }
   | undefined;
 
-  export const SigninFormSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email." }).trim(),
-    password: z
-      .string()
-      .min(8, { message: "Be at least 8 characters long" })
-      .regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
-      .regex(/[0-9]/, { message: "Contain at least one number." })
-      .regex(/[^a-zA-Z0-9]/, {
-        message: "Contain at least one special character.",
-      })
-      .trim(),
-  });
-  
-  export type SigninFormState =
-    | {
-        errors?: {
-          email?: string[];
-          password?: string[];
-        };
-        message?: string;
-      }
-    | undefined;
-  
+export const SigninFormSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email." }).trim(),
+  password: z
+    .string()
+    .min(8, { message: "Be at least 8 characters long" })
+    .regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
+    .regex(/[0-9]/, { message: "Contain at least one number." })
+    .regex(/[^a-zA-Z0-9]/, {
+      message: "Contain at least one special character.",
+    })
+    .trim(),
+});
+
+export type SigninFormState =
+  | {
+      errors?: {
+        email?: string[];
+        password?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
+
+export const EventFormSchema = z.object({
+  eventName: z
+    .string()
+    .min(4, { message: "Please enter a valid event name." })
+    .trim(),
+  numberOfPeople: z
+    .string()
+    .min(1, { message: "Please enter a valid number of people." })
+    .trim(),
+});
+
+export type EventFormState =
+  | {
+      errors?: {
+        eventName?: string[];
+        numberOfPeople?: string[];
+      };
+      message?: string;
+    }
+  | undefined;

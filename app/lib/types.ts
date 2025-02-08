@@ -12,49 +12,23 @@ export type AuthUserProp = {
   email: string;
 };
 
-export type MainBillProps = {
-  id: string | null;
+export type EventInfoProp = {
+  id: string;
   title: string;
-  billTotal: number;
-  dated: Date;
-  billAmountPaid: number;
-  items: ItemsProps[];
-  taxes: TaxesProp[];
-  users: UsersProp[];
-  userToItems: UserToItemsProp[];
-  extraFee: ExtraFeeProp[];
+  start: string;
 };
 
-export type UsersProp = {
-  id: number;
-  name: string;
+export type ExtendedProps = {
+  numberOPeople: string;
+  comments: string;
+  status: number;
 };
 
-export type ItemsProps = {
-  id: number;
-  name: string;
-  rate: number;
-  quantity: number;
-};
-
-export type UserToItemsProp = {
-  userId: number;
-  items: UserToItemsQuantityProp[];
-};
-
-export type UserToItemsQuantityProp = {
-  itemId: number;
-  quantity: number;
-};
-
-export type TaxesProp = {
-  id: number;
-  taxType: string;
-  taxPercentage: number;
-};
-
-export type ExtraFeeProp = {
-  // id: number;
-  // feeType: string;
-  feeAmount: number;
+export type EventProp = {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  extendedProps: ExtendedProps;
+  description?: string;
 };
