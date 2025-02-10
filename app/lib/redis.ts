@@ -86,12 +86,24 @@ export async function isUserExists(email) {
 
 // Events
 
+function fetchEventStatus(status) {
+  switch (status) {
+    case 0:
+      return { backgroundColor: "#FBBF24", textColor: "#000" };
+    case 1:
+      return { backgroundColor: "#A3E635", textColor: "#000" };
+    case 2:
+      return { backgroundColor: "#EF4444", textColor: "#FFF" };
+  }
+}
+
 export async function fetchAllEvents(propertyId = "") {
   const client = await clientPromise;
   const db = client.db("booking");
   const collection = db.collection("events");
 
   const events = await collection.find({}).toArray();
+  console.log('events: ', events);
   if (events.length > 0) {
     const allEvents = events.map((event) => {
       return {
@@ -105,6 +117,7 @@ export async function fetchAllEvents(propertyId = "") {
           status: event.status,
         },
         description: "Test",
+        ...fetchEventStatus(event.status),
       };
     });
 
@@ -142,11 +155,11 @@ export async function fetchEvent(eventId, propertyId = "") {
               status: event.status,
             },
             description: "Test",
+            ...fetchEventStatus(event.status),
           },
         },
       };
-    }
-    else {
+    } else {
       return { error: "No Events Found!" };
     }
   } else {
@@ -156,9 +169,18 @@ export async function fetchEvent(eventId, propertyId = "") {
 
 export async function createEvent(formData) {
   try {
-    const { eventName, numberOfPeople, comments, startDate, endDate, status } =
-      Object.fromEntries(formData);
+    const {
+      eventId,
+      eventName,
+      numberOfPeople,
+      comments,
+      startDate,
+      endDate,
+      status,
+    } = Object.fromEntries(formData);
+    console.log("createEvent: ", formData);
     const eventData = {
+      id: eventId,
       title: eventName,
       start: startDate,
       end: endDate,
@@ -167,28 +189,161 @@ export async function createEvent(formData) {
         comments: comments,
         status: status,
       },
+      ...fetchEventStatus(status),
     };
 
     const client = await clientPromise;
     const db = client.db("booking");
     const collection = db.collection("events");
 
-    const result = await collection.insertOne({
-      eventName,
-      numberOfPeople,
-      comments,
-      status: 0,
-      start: startDate,
-      end: endDate,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    return {
-      message: {
-        status: "success",
-        data: { id: result.insertedId.toString(), ...eventData },
-      },
-    };
+    if (eventId != "") {
+      const result = await collection.updateOne(
+        { _id: new ObjectId(eventId) },
+        {
+          $set: {
+            eventName,
+            numberOfPeople,
+            comments,
+            status,
+            start: startDate,
+            end: endDate,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      return {
+        message: {
+          status: "success",
+          data: eventData,
+        },
+      };
+    } else {
+      const result = await collection.insertOne({
+        eventName,
+        numberOfPeople,
+        comments,
+        status: 0,
+        start: startDate,
+        end: endDate,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      return {
+        message: {
+          status: "success",
+          data: { id: result.insertedId.toString(), ...eventData },
+        },
+      };
+    }
+  } catch (e) {
+    return { error: e };
+  }
+}
+
+export async function deleteEvent(eventId) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("booking");
+    const collection = db.collection("events");
+
+    if (eventId != "") {
+      const result = await collection.deleteOne({ _id: new ObjectId(eventId) });
+
+      return {
+        message: {
+          status: "success",
+          data: { eventId, text: "Event Deleted Successfully." },
+        },
+      };
+    } else {
+      return {
+        error: "No Event found;",
+      };
+    }
+  } catch (e) {
+    return { error: e };
+  }
+}
+
+export async function approveEvent(event) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("booking");
+    const collection = db.collection("events");
+
+    if (event.id != "") {
+      const updatedEvent = {
+        ...event,
+        extendedProps: {
+          status: 1,
+        },
+        ...fetchEventStatus(1),
+      };
+      const result = await collection.updateOne(
+        { _id: new ObjectId(event.id) },
+        {
+          $set: {
+            ...event,
+            status: 1,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      return {
+        message: {
+          status: "success",
+          data: updatedEvent,
+        },
+      };
+    } else {
+      return {
+        error: "No Event found;",
+      };
+    }
+  } catch (e) {
+    return { error: e };
+  }
+}
+
+export async function rejectEvent(event) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("booking");
+    const collection = db.collection("events");
+
+    if (event.id != "") {
+      const updatedEvent = {
+        ...event,
+        extendedProps: {
+          status: 2,
+        },
+        ...fetchEventStatus(2),
+      };
+      const result = await collection.updateOne(
+        { _id: new ObjectId(event.id) },
+        {
+          $set: {
+            ...event,
+            status: 2,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      return {
+        message: {
+          status: "success",
+          data: updatedEvent,
+        },
+      };
+    } else {
+      return {
+        error: "No Event found;",
+      };
+    }
   } catch (e) {
     return { error: e };
   }

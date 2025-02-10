@@ -27,6 +27,7 @@ type CalendarPopupModalProps = {
   events: EventProp[];
   setOpen: Dispatch<SetStateAction<boolean>>;
   setEvents: Dispatch<SetStateAction<EventProp[]>>;
+  setEventInfo: Dispatch<SetStateAction<EventInfoProp | null>>;
 };
 
 const Transition = forwardRef(function Transition(
@@ -44,6 +45,7 @@ export default function CalendarPopupModal({
   events,
   setOpen,
   setEvents,
+  setEventInfo,
 }: CalendarPopupModalProps) {
   const { createToast, updateToast } = useToastContext();
 
@@ -69,7 +71,10 @@ export default function CalendarPopupModal({
   async function handleSubmit(formData: FormData) {
     const toastId = createToast("Adding Event...", "info");
     if (eventNameRef.current && numberOfPeopleRef.current) {
+      const { eventId } = Object.fromEntries(formData);
+      const isNewEvent = eventId == "";
       const response = await createEvent(formData);
+      console.log("response: ", response);
       if (response.error) {
         console.log(response.error, typeof response.error);
         setError(response.error);
@@ -87,8 +92,15 @@ export default function CalendarPopupModal({
         };
         setOpen(false);
         setEvents((prevEvents) => {
-          const newEvents: EventProp[] = [userData, ...prevEvents];
-          return newEvents;
+          if (isNewEvent) {
+            const newEvents: EventProp[] = [userData, ...prevEvents];
+            return newEvents;
+          } else {
+            const newEvents: EventProp[] = prevEvents.map((event) =>
+              event.id == userData.id ? userData : event
+            );
+            return newEvents;
+          }
         });
         console.log("Event Added Successful.");
         updateToast("Event Added Successful.", "success", toastId);
@@ -124,13 +136,37 @@ export default function CalendarPopupModal({
           );
         } else {
           const startDateFormat = new Date(eventInfo.start);
-          const endDateFormat = new Date(eventInfo.start);
-          endDateFormat.setDate(endDateFormat.getDate() + 1);
+          const endDateFormat = new Date(
+            eventInfo.end != "" ? eventInfo.end : eventInfo.start
+          );
+          endDateFormat.setDate(
+            eventInfo.end != ""
+              ? endDateFormat.getDate()
+              : endDateFormat.getDate() + 1
+          );
+          // console.log("endDateFormat: ", eventInfo.start);
+          // console.log(
+          //   "endDateFormat Updated: ",
+          //   `${endDateFormat.getFullYear()}-${
+          //     endDateFormat.getMonth() + 1
+          //   }-${endDateFormat.getDate()}`,
+          //   new Date(
+          //     `${endDateFormat.getFullYear()}-${
+          //       endDateFormat.getMonth() + 1
+          //     }-${endDateFormat.getDate()}`
+          //   )
+          //     .toLocaleDateString("en-CA")
+          //     .split("T")[0]
+          // );
           setStartDate(eventInfo.start);
           setEndDate(
-            `${endDateFormat.getFullYear()}-${
-              endDateFormat.getMonth() + 1
-            }-${endDateFormat.getDate()}`
+            new Date(
+              `${endDateFormat.getFullYear()}-${
+                endDateFormat.getMonth() + 1
+              }-${endDateFormat.getDate()}`
+            )
+              .toLocaleDateString("en-CA")
+              .split("T")[0]
           );
           setEndDateDisplay(
             new Date(
@@ -152,7 +188,16 @@ export default function CalendarPopupModal({
     <Dialog
       open={open}
       TransitionComponent={Transition}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setOpen(false);
+        setEventInfo(null);
+        setEventTitle("");
+        setNumberOPeople("");
+        setComments("");
+        setStartDate("");
+        setEndDate("");
+        setEndDateDisplay("");
+      }}
     >
       <div className="flex justify-between items-center">
         <DialogTitle className="capitalize">Event Details</DialogTitle>

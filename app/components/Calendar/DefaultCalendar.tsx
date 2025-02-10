@@ -8,15 +8,18 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons/faCheck";
+import { faX } from "@fortawesome/free-solid-svg-icons/faX";
 import CalendarPopupModal from "@/components/Calendar/CalendarPopupModal";
-import { fetchAllEvents } from "@/lib/redis";
-import { EventProp } from "@/lib/types";
-
-type EventInfoProp = {
-  id: string;
-  title: string;
-  start: string;
-};
+import {
+  fetchAllEvents,
+  deleteEvent,
+  approveEvent,
+  rejectEvent,
+} from "@/lib/redis";
+import { EventInfoProp, EventProp } from "@/lib/types";
+import { useToastContext } from "@/contexts/ToastContext";
 
 const defaultEvent = {
   id: "1",
@@ -24,6 +27,8 @@ const defaultEvent = {
   date: "2025-02-15",
 };
 export default function DefaultCalendar() {
+  const { createToast } = useToastContext();
+
   const [open, setOpen] = useState(false);
   const [popupType, setPopupType] = useState("");
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -65,6 +70,72 @@ export default function DefaultCalendar() {
     setAnchorEl(null);
   };
 
+  const handleDeleteEvent = async () => {
+    if (eventInfo) {
+      const result = await deleteEvent(eventInfo.id);
+      if (result.message) {
+        createToast(result.message.data.text, "success");
+        setEvents((prevEvents) => {
+          const updatedEvents = prevEvents.filter(
+            (event) => event.id != result.message.data.eventId
+          );
+          return updatedEvents;
+        });
+        setAnchorEl(null);
+      }
+    }
+  };
+
+  const handleApproveEvent = async () => {
+    if (eventInfo) {
+      const currentEvent = events.find((event) => event.id == eventInfo.id);
+      if (currentEvent) {
+        const result = await approveEvent(currentEvent);
+        if (result.message) {
+          createToast(result.message.data.text, "success");
+          setEvents((prevEvents) => {
+            const updatedEvents = prevEvents.filter(
+              (event) => event.id != result.message.data.eventId
+            );
+            return updatedEvents;
+          });
+        }
+        setAnchorEl(null);
+      }
+    }
+  };
+
+  const handleRejectEvent = async () => {
+    if (eventInfo) {
+      const currentEvent = events.find((event) => event.id == eventInfo.id);
+      if (currentEvent) {
+        const result = await rejectEvent(currentEvent);
+        if (result.message) {
+          createToast(result.message.data.text, "success");
+          setEvents((prevEvents) => {
+            const updatedEvents = prevEvents.filter(
+              (event) => event.id != result.message.data.eventId
+            );
+            return updatedEvents;
+          });
+        }
+        setAnchorEl(null);
+      }
+    }
+  };
+
+  const testSelect = (arg) => {
+    console.log("testSelect: ", arg);
+
+    setOpen(true);
+    setEventInfo({
+      id: "",
+      title: "",
+      start: arg.startStr,
+      end: arg.endStr,
+    });
+  };
+
   useEffect(() => {
     const init = async () => {
       const allEvents = await fetchAllEvents();
@@ -81,21 +152,29 @@ export default function DefaultCalendar() {
   }, []);
 
   useEffect(() => {
-    console.log("events: ", events);
+    console.log("events: ", events, events.length);
+    if (calendarRef.current) {
+      console.log("calendarRef exists");
+      calendarRef.current.getApi().refetchEvents(); // ✅ Refresh events when data changes
+    }
   }, [events]);
 
   return (
     <>
       <FullCalendar
+        key={events.length}
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         validRange={{
           start: new Date(), // Disables past dates
         }}
+        nextDayThreshold="10:00:00"
         events={events}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
+        selectable={true}
+        select={testSelect}
       />
       <CalendarPopupModal
         open={open}
@@ -103,6 +182,7 @@ export default function DefaultCalendar() {
         eventInfo={eventInfo}
         events={events}
         setEvents={setEvents}
+        setEventInfo={setEventInfo}
       />
       <Popover
         open={Boolean(anchorEl)}
@@ -120,8 +200,19 @@ export default function DefaultCalendar() {
             aria-label="Vertical button group"
             className="w-full bg-dark "
           >
-            <Button className="capitalize text-light border-light">
+            <Button
+              className="capitalize text-light border-light hover:bg-green/60"
+              onClick={handleApproveEvent}
+            >
+              <FontAwesomeIcon icon={faCheck} className="mr-1" />
               Approve
+            </Button>
+            <Button
+              className="capitalize text-light border-light hover:bg-red/60"
+              onClick={handleRejectEvent}
+            >
+              <FontAwesomeIcon icon={faX} className="mr-1" />
+              Reject
             </Button>
             <Button
               className="capitalize text-light border-light"
@@ -129,7 +220,10 @@ export default function DefaultCalendar() {
             >
               Edit
             </Button>
-            <Button className="capitalize text-light border-light">
+            <Button
+              className="capitalize text-light border-light"
+              onClick={handleDeleteEvent}
+            >
               Delete
             </Button>
           </ButtonGroup>
@@ -139,11 +233,22 @@ export default function DefaultCalendar() {
   );
 }
 
-function renderEventContent(eventInfo) {
+function renderEventContent(event) {
   return (
-    <>
-      <b>{eventInfo.timeText}</b>
-      <i>{eventInfo.event.title}</i>
-    </>
+    <div className={`${eventStatusClass(event.event.extendedProps.status)}`}>
+      {/* <b>{event.timeText}</b> */}
+      <b>{event.event.title}</b>
+    </div>
   );
+}
+
+function eventStatusClass(status) {
+  switch (status) {
+    case 0:
+      return "bg-waiting text-dark";
+    case 1:
+      return "bg-approved text-light";
+    case 2:
+      return "bg-rejected text-light";
+  }
 }

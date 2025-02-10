@@ -19,6 +19,11 @@ const config: Config = {
         dark: colors.zinc[900],
         blue: colors.blue[700],
         gray: colors.gray[400],
+        red: colors.red[600],
+        green: colors.emerald[900],
+        waiting: colors.amber[400],
+        approved: colors.lime[400],
+        rejected: colors.red[500],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
