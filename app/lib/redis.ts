@@ -103,7 +103,6 @@ export async function fetchAllEvents(propertyId = "") {
   const collection = db.collection("events");
 
   const events = await collection.find({}).toArray();
-  console.log('events: ', events);
   if (events.length > 0) {
     const allEvents = events.map((event) => {
       return {
@@ -137,9 +136,7 @@ export async function fetchEvent(eventId, propertyId = "") {
   const db = client.db("booking");
   const collection = db.collection("events");
   if (eventId != "") {
-    console.log("eventId: ", new Object(eventId));
     const event = await collection.findOne({ _id: new ObjectId(eventId) });
-    console.log("event: ", event);
     if (event) {
       return {
         message: {
@@ -178,7 +175,6 @@ export async function createEvent(formData) {
       endDate,
       status,
     } = Object.fromEntries(formData);
-    console.log("createEvent: ", formData);
     const eventData = {
       id: eventId,
       title: eventName,
@@ -344,6 +340,25 @@ export async function rejectEvent(event) {
         error: "No Event found;",
       };
     }
+  } catch (e) {
+    return { error: e };
+  }
+}
+
+export async function deleteAllEvents(propertyId = "") {
+  try {
+    const client = await clientPromise;
+    const db = client.db("booking");
+    const collection = db.collection("events");
+
+    const events = await collection.deleteMany({});
+
+    return {
+      message: {
+        status: "success",
+        data: 'All Events Deleted.',
+      },
+    };
   } catch (e) {
     return { error: e };
   }

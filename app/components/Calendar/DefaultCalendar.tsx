@@ -17,6 +17,7 @@ import {
   deleteEvent,
   approveEvent,
   rejectEvent,
+  deleteAllEvents,
 } from "@/lib/redis";
 import { EventInfoProp, EventProp } from "@/lib/types";
 import { useToastContext } from "@/contexts/ToastContext";
@@ -38,7 +39,6 @@ export default function DefaultCalendar() {
   const calendarRef = useRef(null);
 
   const handleDateClick = (arg) => {
-    console.log("handleDateClick: ", arg);
     setOpen(true);
     setEventInfo({
       id: "",
@@ -48,8 +48,6 @@ export default function DefaultCalendar() {
   };
 
   const handleEventClick = (event) => {
-    console.log("handleEventClick: ", event);
-
     event.jsEvent.preventDefault(); // don't let the browser navigate
 
     setEventInfo({
@@ -124,9 +122,7 @@ export default function DefaultCalendar() {
     }
   };
 
-  const testSelect = (arg) => {
-    console.log("testSelect: ", arg);
-
+  const handleDateSelection = (arg) => {
     setOpen(true);
     setEventInfo({
       id: "",
@@ -134,6 +130,16 @@ export default function DefaultCalendar() {
       start: arg.startStr,
       end: arg.endStr,
     });
+  };
+
+  const handleDeleteAllEvents = async () => {
+    console.log("handleDeleteAllEvents: ");
+
+    const result = await deleteAllEvents();
+    if (result.message) {
+      createToast(result.message.data, "success");
+      setEvents([]);
+    }
   };
 
   useEffect(() => {
@@ -161,6 +167,13 @@ export default function DefaultCalendar() {
 
   return (
     <>
+      <Button
+        className="capitalize text-light border-light"
+        variant="contained"
+        onClick={handleDeleteAllEvents}
+      >
+        Delete All Events
+      </Button>
       <FullCalendar
         key={events.length}
         ref={calendarRef}
@@ -174,7 +187,7 @@ export default function DefaultCalendar() {
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         selectable={true}
-        select={testSelect}
+        select={handleDateSelection}
       />
       <CalendarPopupModal
         open={open}
