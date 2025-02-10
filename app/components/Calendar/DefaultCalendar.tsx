@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
 import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
@@ -89,14 +89,14 @@ export default function DefaultCalendar() {
       const currentEvent = events.find((event) => event.id == eventInfo.id);
       if (currentEvent) {
         const result = await approveEvent(currentEvent);
+
         if (result.message) {
           createToast(result.message.data.text, "success");
-          setEvents((prevEvents) => {
-            const updatedEvents = prevEvents.filter(
-              (event) => event.id != result.message.data.eventId
-            );
-            return updatedEvents;
-          });
+          setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+              event.id == result.message.data.id ? result.message.data : event
+            )
+          );
         }
         setAnchorEl(null);
       }
@@ -108,14 +108,14 @@ export default function DefaultCalendar() {
       const currentEvent = events.find((event) => event.id == eventInfo.id);
       if (currentEvent) {
         const result = await rejectEvent(currentEvent);
+
         if (result.message) {
           createToast(result.message.data.text, "success");
-          setEvents((prevEvents) => {
-            const updatedEvents = prevEvents.filter(
-              (event) => event.id != result.message.data.eventId
-            );
-            return updatedEvents;
-          });
+          setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+              event.id == result.message.data.id ? result.message.data : event
+            )
+          );
         }
         setAnchorEl(null);
       }
@@ -133,8 +133,6 @@ export default function DefaultCalendar() {
   };
 
   const handleDeleteAllEvents = async () => {
-    console.log("handleDeleteAllEvents: ");
-
     const result = await deleteAllEvents();
     if (result.message) {
       createToast(result.message.data, "success");
@@ -159,11 +157,30 @@ export default function DefaultCalendar() {
 
   useEffect(() => {
     console.log("events: ", events, events.length);
-    if (calendarRef.current) {
-      console.log("calendarRef exists");
-      calendarRef.current.getApi().refetchEvents(); // ✅ Refresh events when data changes
-    }
   }, [events]);
+
+  const renderEventContent = (event) => {
+    return (
+      <div className={`${eventStatusClass(event.event.extendedProps.status)}`}>
+        {/* <b>{event.timeText}</b> */}
+        <b>{event.event.title}</b>
+      </div>
+    );
+  };
+
+  function eventStatusClass(status) {
+    switch (status) {
+      // case 0:
+      // case "0":
+      //   return "bg-waiting text-dark";
+      case 1:
+      case "1":
+        return "bg-approved text-dark";
+      case 2:
+      case "2":
+        return "bg-rejected text-light";
+    }
+  }
 
   return (
     <>
@@ -188,6 +205,7 @@ export default function DefaultCalendar() {
         eventClick={handleEventClick}
         selectable={true}
         select={handleDateSelection}
+        eventContent={renderEventContent}
       />
       <CalendarPopupModal
         open={open}
@@ -244,24 +262,4 @@ export default function DefaultCalendar() {
       </Popover>
     </>
   );
-}
-
-function renderEventContent(event) {
-  return (
-    <div className={`${eventStatusClass(event.event.extendedProps.status)}`}>
-      {/* <b>{event.timeText}</b> */}
-      <b>{event.event.title}</b>
-    </div>
-  );
-}
-
-function eventStatusClass(status) {
-  switch (status) {
-    case 0:
-      return "bg-waiting text-dark";
-    case 1:
-      return "bg-approved text-light";
-    case 2:
-      return "bg-rejected text-light";
-  }
 }

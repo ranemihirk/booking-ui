@@ -86,17 +86,6 @@ export async function isUserExists(email) {
 
 // Events
 
-function fetchEventStatus(status) {
-  switch (status) {
-    case 0:
-      return { backgroundColor: "#FBBF24", textColor: "#000" };
-    case 1:
-      return { backgroundColor: "#A3E635", textColor: "#000" };
-    case 2:
-      return { backgroundColor: "#EF4444", textColor: "#FFF" };
-  }
-}
-
 export async function fetchAllEvents(propertyId = "") {
   const client = await clientPromise;
   const db = client.db("booking");
@@ -116,7 +105,6 @@ export async function fetchAllEvents(propertyId = "") {
           status: event.status,
         },
         description: "Test",
-        ...fetchEventStatus(event.status),
       };
     });
 
@@ -152,7 +140,6 @@ export async function fetchEvent(eventId, propertyId = "") {
               status: event.status,
             },
             description: "Test",
-            ...fetchEventStatus(event.status),
           },
         },
       };
@@ -185,7 +172,6 @@ export async function createEvent(formData) {
         comments: comments,
         status: status,
       },
-      ...fetchEventStatus(status),
     };
 
     const client = await clientPromise;
@@ -270,12 +256,13 @@ export async function approveEvent(event) {
     const collection = db.collection("events");
 
     if (event.id != "") {
+      const test = event.extendedProps;
       const updatedEvent = {
         ...event,
         extendedProps: {
+          ...test,
           status: 1,
         },
-        ...fetchEventStatus(1),
       };
       const result = await collection.updateOne(
         { _id: new ObjectId(event.id) },
@@ -311,12 +298,13 @@ export async function rejectEvent(event) {
     const collection = db.collection("events");
 
     if (event.id != "") {
+      const test = event.extendedProps;
       const updatedEvent = {
         ...event,
         extendedProps: {
+          ...test,
           status: 2,
         },
-        ...fetchEventStatus(2),
       };
       const result = await collection.updateOne(
         { _id: new ObjectId(event.id) },
@@ -356,7 +344,7 @@ export async function deleteAllEvents(propertyId = "") {
     return {
       message: {
         status: "success",
-        data: 'All Events Deleted.',
+        data: "All Events Deleted.",
       },
     };
   } catch (e) {

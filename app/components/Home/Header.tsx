@@ -1,5 +1,6 @@
 "use client";
 import { useState, MouseEvent } from "react";
+import Link from "next/link";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -30,89 +31,100 @@ export default function Header() {
 
   return (
     <>
-      <header className="header flex justify-between items-center shadow-md shadow-indigo-500/50 p-8">
-        <h1 className="capitalize text-light font-bold text-3xl">
-          booking app
-        </h1>
-        {!user ? (
-          <Button
-            className="capitalize text-lg"
-            variant="outlined"
-            onClick={() => setIsOpenPopup(!isOpenPopup)}
-          >
-            Login / Sign Up
-          </Button>
-        ) : (
-          <Tooltip title="Account settings">
-            <IconButton
-              onClick={handleClick}
-              aria-controls={open ? "account-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
-              className="size-auto"
-            >
-              <Avatar className="capitalize bg-dark/80 shadow-inner shadow-blue text-[100%]">
-                {user.name.charAt(0)}{" "}
-              </Avatar>
-            </IconButton>
-          </Tooltip>
-        )}
+      <header className="header flex flex-col gap-4 xl:flex-row xl:gap-0 justify-between items-center shadow-md shadow-indigo-500/50 p-8">
+        <Link href="/">
+          <h1 className="capitalize text-light font-bold text-3xl">
+            booking app
+          </h1>
+        </Link>
 
-        <Menu
-          anchorEl={anchorEl}
-          id="account-menu"
-          open={open}
-          onClose={handleClose}
-          onClick={handleClose}
-          slotProps={{
-            paper: {
-              elevation: 0,
-              sx: {
-                overflow: "visible",
-                filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                mt: 1.5,
-                "& .MuiAvatar-root": {
-                  width: 32,
-                  height: 32,
-                  ml: -0.5,
-                  mr: 1,
-                },
-                "&::before": {
-                  content: '""',
-                  display: "block",
-                  position: "absolute",
-                  top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: "background.paper",
-                  transform: "translateY(-50%) rotate(45deg)",
-                  zIndex: 0,
+        <div className="flex items-center gap-4">
+          <Link
+            href="/calendar"
+            className="px-4 py-2 border border-blue hover:bg-blue/40 text-light rounded-xl transition-all delay-150"
+          >
+            Calendar
+          </Link>
+          {!user ? (
+            <Button
+              className="capitalize text-lg"
+              variant="outlined"
+              onClick={() => setIsOpenPopup(!isOpenPopup)}
+            >
+              Login / Sign Up
+            </Button>
+          ) : (
+            <Tooltip title="Account settings">
+              <IconButton
+                onClick={handleClick}
+                aria-controls={open ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                className="size-auto"
+              >
+                <Avatar className="capitalize bg-dark/80 shadow-inner shadow-blue text-[100%]">
+                  {user.name.charAt(0)}{" "}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+          )}
+
+          <Menu
+            anchorEl={anchorEl}
+            id="account-menu"
+            open={open}
+            onClose={handleClose}
+            onClick={handleClose}
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: {
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                  mt: 1.5,
+                  "& .MuiAvatar-root": {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                  "&::before": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: "background.paper",
+                    transform: "translateY(-50%) rotate(45deg)",
+                    zIndex: 0,
+                  },
                 },
               },
-            },
-          }}
-          transformOrigin={{ horizontal: "right", vertical: "top" }}
-          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-          <MenuItem onClick={handleClose} className="bg-dark/80 text-light">
-            <Avatar className="bg-dark/80" /> Profile
-          </MenuItem>
-          <Divider className="m-0" />
-
-          <MenuItem
-            onClick={() => {
-              logoutUser();
-              createToast("Logout Successful.", "success");
             }}
-            className="bg-dark/80 text-light"
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
           >
-            <ListItemIcon className="bg-dark/80 min-w-fit p-2 text-light rounded-full mr-2">
-              <FontAwesomeIcon icon={faPowerOff} />
-            </ListItemIcon>
-            Logout
-          </MenuItem>
-        </Menu>
+            <MenuItem onClick={handleClose} className="bg-dark/80 text-light">
+              <Avatar className="bg-dark/80" /> Profile
+            </MenuItem>
+            <Divider className="m-0" />
+
+            <MenuItem
+              onClick={() => {
+                logoutUser();
+                createToast("Logout Successful.", "success");
+              }}
+              className="bg-dark/80 text-light"
+            >
+              <ListItemIcon className="bg-dark/80 min-w-fit p-2 text-light rounded-full mr-2">
+                <FontAwesomeIcon icon={faPowerOff} />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
+        </div>
       </header>
       <PopupModal isOpenPopup={isOpenPopup} setIsOpenPopup={setIsOpenPopup} />
     </>

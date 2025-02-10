@@ -115,14 +115,24 @@ export default function CalendarPopupModal({
     setEndDate(e.target.value);
   };
 
+  const resetValues = () =>{
+    setOpen(false);
+    setEventInfo(null);
+    setEventTitle("");
+    setNumberOPeople("");
+    setComments("");
+    setStartDate("");
+    setEndDate("");
+    setEndDateDisplay("");
+  };
+
   useEffect(() => {
     if (!open || !eventInfo) return;
     const initEvent = async () => {
       if (eventInfo) {
-        console.log("eventInfo: ", eventInfo);
         setEventId(eventInfo.id);
         const result = await fetchEvent(eventInfo.id);
-
+        console.log("eventInfo: ", eventInfo);
         if (!result.error) {
           const currentEvent = result.message.data;
           console.log("currentEvent: ", currentEvent);
@@ -144,20 +154,6 @@ export default function CalendarPopupModal({
               ? endDateFormat.getDate()
               : endDateFormat.getDate() + 1
           );
-          // console.log("endDateFormat: ", eventInfo.start);
-          // console.log(
-          //   "endDateFormat Updated: ",
-          //   `${endDateFormat.getFullYear()}-${
-          //     endDateFormat.getMonth() + 1
-          //   }-${endDateFormat.getDate()}`,
-          //   new Date(
-          //     `${endDateFormat.getFullYear()}-${
-          //       endDateFormat.getMonth() + 1
-          //     }-${endDateFormat.getDate()}`
-          //   )
-          //     .toLocaleDateString("en-CA")
-          //     .split("T")[0]
-          // );
           setStartDate(eventInfo.start);
           setEndDate(
             new Date(
@@ -182,30 +178,19 @@ export default function CalendarPopupModal({
     };
 
     initEvent();
-  }, [open, eventInfo]);
+  }, [open]);
 
   return (
     <Dialog
       open={open}
       TransitionComponent={Transition}
-      onClose={() => {
-        setOpen(false);
-        setEventInfo(null);
-        setEventTitle("");
-        setNumberOPeople("");
-        setComments("");
-        setStartDate("");
-        setEndDate("");
-        setEndDateDisplay("");
-      }}
+      onClose={resetValues}
     >
       <div className="flex justify-between items-center">
         <DialogTitle className="capitalize">Event Details</DialogTitle>
         <Button
           className="rounded-full p-0 m-0 mr-4 min-w-fit"
-          onClick={() => {
-            setOpen(!open);
-          }}
+          onClick={resetValues}
         >
           <FontAwesomeIcon icon={faCircleXmark} size="2xl" />
         </Button>
