@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons/faArrowRight";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -28,10 +29,12 @@ export default function HomeMain() {
   return (
     <section className="landscape:max-lg:h-full h-[80vh] xl:h-screen w-full">
       <div className="relative h-full xl:h-[75%]">
-        <img
+        <Image
           src="/assets/images/home.jpg"
-          alt=""
-          className="size-full object-cover object-top"
+          alt="Banner"
+          fill
+          className="object-cover object-top"
+          priority // ✅ Loads image faster
         />
         {/* Overlay */}
         <div className="z-10 absolute inset-0 bg-black bg-opacity-50 size-full"></div>
