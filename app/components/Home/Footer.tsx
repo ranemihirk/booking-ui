@@ -19,7 +19,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="footer text-lg text-right text-light  p-6">
+    <footer className="footer text-lg text-right text-dark dark:text-light p-6 border-t border-dark/20 dark:border-light/20">
       Developed by &nbsp;
       <Link
         href="https://www.ranemihirk.com/"

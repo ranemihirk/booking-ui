@@ -55,7 +55,7 @@ export default function HomeMain() {
         <div className="z-20 absolute bottom-0 xl:-bottom-[9%] left-0 w-full flex items-center justify-center">
           <div className="container rounded-xl">
             <div className="relative text-center xl:text-left">
-              <div className="bg-light rounded-xl p-4 xl:p-8">
+              <div className="bg-light rounded-xl p-4 xl:p-8 shadow-md dark:shadow-light">
                 <div className="flex flex-col xl:flex-row gap-4 items-center">
                   <TextField
                     id="location"
