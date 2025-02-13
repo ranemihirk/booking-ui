@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./../styles/global.css";
 import DefaultContextProvider from "@/contexts/DefaultContext";
-import AuthContextProvider from "@/contexts/AuthContext";
+import AuthContextProvider, { useAuthContext } from "@/contexts/AuthContext";
 import ToastContextProvider from "@/contexts/ToastContext";
 import CalendarContextProvider from "@/contexts/CalendarContext";
 import { ToastContainer } from "react-toastify";

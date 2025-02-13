@@ -8,6 +8,7 @@ import {
   SetStateAction,
 } from "react";
 import { useToastContext } from "@/contexts/ToastContext";
+import { useCalendarContext } from "@/contexts/CalendarContext";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -17,18 +18,8 @@ import Divider from "@mui/material/Divider";
 import { TransitionProps } from "@mui/material/transitions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons/faCircleXmark";
-import { createevent } from "@/actions/calendar/calendar";
 import { createEvent, fetchEvent } from "@/lib/redis";
 import { EventInfoProp, EventProp } from "@/lib/types";
-
-type CalendarPopupModalProps = {
-  open: boolean;
-  eventInfo: EventInfoProp | null;
-  events: EventProp[];
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  setEvents: Dispatch<SetStateAction<EventProp[]>>;
-  setEventInfo: Dispatch<SetStateAction<EventInfoProp | null>>;
-};
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -39,15 +30,10 @@ const Transition = forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function CalendarPopupModal({
-  open,
-  eventInfo,
-  events,
-  setOpen,
-  setEvents,
-  setEventInfo,
-}: CalendarPopupModalProps) {
+export default function CalendarPopupModal() {
   const { createToast, updateToast } = useToastContext();
+  const { open, eventInfo, setOpen, setEvents, setEventInfo } =
+    useCalendarContext();
 
   const eventIdRef = useRef<HTMLInputElement>(null);
   const eventNameRef = useRef<HTMLInputElement>(null);
@@ -115,7 +101,7 @@ export default function CalendarPopupModal({
     setEndDate(e.target.value);
   };
 
-  const resetValues = () =>{
+  const resetValues = () => {
     setOpen(false);
     setEventInfo(null);
     setEventTitle("");
@@ -181,11 +167,7 @@ export default function CalendarPopupModal({
   }, [open]);
 
   return (
-    <Dialog
-      open={open}
-      TransitionComponent={Transition}
-      onClose={resetValues}
-    >
+    <Dialog open={open} TransitionComponent={Transition} onClose={resetValues}>
       <div className="flex justify-between items-center">
         <DialogTitle className="capitalize">Event Details</DialogTitle>
         <Button
