@@ -1,5 +1,5 @@
 "use client";
-import { useState, MouseEvent } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 import { useDefaultContext } from "@/contexts/DefaultContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useToastContext } from "@/contexts/ToastContext";
@@ -20,7 +20,7 @@ import PopupModal from "@/components/Auth/PopupModal";
 
 export default function Header() {
   const { isDarkMode, toggleDarkMode } = useDefaultContext();
-  const { user, logoutUser } = useAuthContext();
+  const { user, logoutUser, init } = useAuthContext();
   const { createToast } = useToastContext();
 
   const [isOpenPopup, setIsOpenPopup] = useState(false);
@@ -89,6 +89,10 @@ export default function Header() {
     },
   }));
 
+  useEffect(() => {
+    init();
+  }, []);
+
   return (
     <>
       <header className="header flex flex-col gap-4 xl:flex-row xl:gap-0 justify-between items-center shadow-md shadow-indigo-500/50 p-8 border-b border-dark/20 dark:border-light/20">
@@ -99,7 +103,11 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <MaterialUISwitch sx={{ m: 1 }} defaultChecked={isDarkMode} onChange={toggleDarkMode} />
+          <MaterialUISwitch
+            sx={{ m: 1 }}
+            defaultChecked={isDarkMode}
+            onChange={toggleDarkMode}
+          />
           <Link
             href="/calendar"
             className="px-4 py-2 border border-blue hover:bg-blue/40 text-blue rounded-lg transition-all delay-150"
