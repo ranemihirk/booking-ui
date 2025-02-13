@@ -15,17 +15,20 @@ const FontAwesomeIcon = dynamic(
   { ssr: false } // ✅ Prevents rehydration issues
 );
 
-export default function HomeMain() {
+export default function HomeBanner() {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
   const [open, setOpen] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
   const onChange = (dates) => {
+    console.log('onChange: ', dates);
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
   };
+
   return (
     <section className="landscape:max-lg:h-full h-[80vh] xl:h-screen w-full">
       <div className="relative h-full xl:h-[75%]">
