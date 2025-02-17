@@ -95,25 +95,19 @@ export default function Header() {
 
   return (
     <>
-      <header className="header flex flex-col gap-4 xl:flex-row xl:gap-0 justify-between items-center shadow-md shadow-indigo-500/50 p-8 border-b border-dark/20 dark:border-light/20">
+      <header className="header flex gap-4 xl:flex-row xl:gap-0 justify-between items-center shadow-md shadow-indigo-500/50 p-8 border-b border-dark/20 dark:border-light/20">
         <Link href="/">
           <h1 className="capitalize text-dark dark:text-light font-bold text-3xl">
             booking app
           </h1>
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col xl:flex-row items-center gap-4">
           <MaterialUISwitch
             sx={{ m: 1 }}
             defaultChecked={isDarkMode}
             onChange={toggleDarkMode}
           />
-          <Link
-            href="/calendar"
-            className="px-4 py-2 border border-blue hover:bg-blue/40 text-blue rounded-lg transition-all delay-150"
-          >
-            Calendar
-          </Link>
           {!user ? (
             <Button
               className="capitalize text-lg"
@@ -175,8 +169,18 @@ export default function Header() {
             transformOrigin={{ horizontal: "right", vertical: "top" }}
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
           >
-            <MenuItem onClick={handleClose} className="bg-dark/80 text-light">
+            <MenuItem onClick={handleClose} className="text-dark">
               <Avatar className="bg-dark/80" /> Profile
+            </MenuItem>
+            <Divider className="m-0" />
+            <MenuItem className="text-dark">
+              <Link
+                href="/calendar"
+                className="flex items-center"
+              >
+                <Avatar className="bg-dark/80" />
+                Calendar
+              </Link>
             </MenuItem>
             <Divider className="m-0" />
 
@@ -185,7 +189,7 @@ export default function Header() {
                 logoutUser();
                 createToast("Logout Successful.", "success");
               }}
-              className="bg-dark/80 text-light"
+              className="text-dark"
             >
               <ListItemIcon className="bg-dark/80 min-w-fit p-2 text-light rounded-full mr-2">
                 <FontAwesomeIcon icon={faPowerOff} />

@@ -74,7 +74,9 @@ export default function AuthContextProvider({
     removeCookie();
   };
 
-  useEffect(() => {}, []);
+  // useEffect(() => {
+  //   console.log("user: ", user);
+  // }, [user]);
 
   return (
     <AuthContext.Provider

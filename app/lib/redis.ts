@@ -25,6 +25,7 @@ export async function createUser(formData) {
         email,
         password,
         createdAt: new Date(),
+        updatedAt: new Date(),
       });
       // const result = await client.hSet(`users:${userData.email}`, userData);
       console.log("result: ", result);
@@ -366,7 +367,7 @@ export async function deleteAllEvents(propertyId) {
 
 // Property
 
-export async function fetchAllProperties() {
+export async function fetchAllProperties(userId="") {
   const client = await clientPromise;
   const db = client.db("booking");
   const collection = db.collection("properties");
@@ -395,7 +396,7 @@ export async function fetchAllProperties() {
   }
 }
 
-export async function fetchProperty(propertyId ) {
+export async function fetchProperty(propertyId) {
   const client = await clientPromise;
   const db = client.db("booking");
   const collection = db.collection("properties");
@@ -426,6 +427,7 @@ export async function fetchProperty(propertyId ) {
 export async function createProperty(formData) {
   try {
     const {
+      userId,
       propertyId,
       propertyName,
       maxOccupancy,
@@ -457,6 +459,7 @@ export async function createProperty(formData) {
             description,
             location,
             status: status == 'off' ? false : true,
+            userId,
             updatedAt: new Date(),
           },
         }
@@ -475,6 +478,7 @@ export async function createProperty(formData) {
         description,
         location,
         status: status == 'off' ? false : true,
+        userId,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

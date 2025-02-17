@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, cloneElement } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useDefaultContext } from "@/contexts/DefaultContext";
 import { usePropertyContext } from "@/contexts/PropertyContext";
 import Button from "@mui/material/Button";
@@ -56,9 +56,10 @@ export default function PropertyList() {
 
   const [value, setValue] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (event: ChangeEvent, newValue: number) => {
+    const target = event.target as HTMLElement;
     setValue(newValue);
-    handlePropertySelectClick(event.target.id);
+    handlePropertySelectClick(target.id);
   };
 
   useEffect(() => {
@@ -92,6 +93,7 @@ export default function PropertyList() {
         {properties && properties.length > 0 ? (
           properties.map((property, key) => (
             <Tab
+            key={property.id}
               label={property.propertyName}
               id={property.id}
               icon={

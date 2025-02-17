@@ -7,6 +7,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useToastContext } from "@/contexts/ToastContext";
 import { usePropertyContext } from "@/contexts/PropertyContext";
 import Dialog from "@mui/material/Dialog";
@@ -14,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
 import { TransitionProps } from "@mui/material/transitions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons/faCircleXmark";
@@ -31,10 +31,12 @@ const Transition = forwardRef(function Transition(
 });
 
 export default function PropertyPopupModal() {
+  const { user } = useAuthContext();
   const { createToast, updateToast } = useToastContext();
   const { open, editProperty, setOpen, setProperties, setEditProperty } =
     usePropertyContext();
 
+  const userIdRef = useRef<HTMLInputElement>(null);
   const propertyIdRef = useRef<HTMLInputElement>(null);
   const propertyNameRef = useRef<HTMLInputElement>(null);
   const maxOccupancyRef = useRef<HTMLInputElement>(null);
@@ -43,6 +45,7 @@ export default function PropertyPopupModal() {
   const descriptionRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [propertyTitle, setPropertyTitle] = useState("");
   const [maxOccupancy, setMaxOccupancy] = useState("");
@@ -109,6 +112,7 @@ export default function PropertyPopupModal() {
     if (!open) return;
     const initProperty = async () => {
       if (editProperty) {
+        setUserId(user.id);
         setPropertyId(editProperty.id);
         setPropertyTitle(editProperty.propertyName);
         setMaxOccupancy(editProperty.maxOccupancy.toString());
@@ -134,6 +138,13 @@ export default function PropertyPopupModal() {
       </div>
       <DialogContent className="bg-dark">
         <form action={handleSubmit}>
+          <input
+            className="w-full h-8 p-2 my-3 rounded"
+            type="hidden"
+            name="userId"
+            value={userId}
+            ref={userIdRef}
+          />
           <input
             className="w-full h-8 p-2 my-3 rounded"
             type="hidden"
