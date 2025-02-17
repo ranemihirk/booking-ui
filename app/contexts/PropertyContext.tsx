@@ -47,6 +47,7 @@ export default function PropertyContextProvider({
 
   const handleClick = () => {
     setOpen(true);
+    setEditProperty(null);
   };
 
   const handleClose = () => {

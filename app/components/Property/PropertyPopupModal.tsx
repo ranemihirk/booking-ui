@@ -32,7 +32,7 @@ const Transition = forwardRef(function Transition(
 
 export default function PropertyPopupModal() {
   const { createToast, updateToast } = useToastContext();
-  const { open, editProperty, setOpen, setProperties } =
+  const { open, editProperty, setOpen, setProperties, setEditProperty } =
     usePropertyContext();
 
   const propertyIdRef = useRef<HTMLInputElement>(null);
@@ -74,6 +74,7 @@ export default function PropertyPopupModal() {
           status: responseData.status,
         };
         setOpen(false);
+        resetValues();
         setProperties((prevProperties) => {
           if (isNewproperty) {
             const newpropertys: PropertyProp[] = [
@@ -113,11 +114,12 @@ export default function PropertyPopupModal() {
         setMaxOccupancy(editProperty.maxOccupancy.toString());
         setLocation(editProperty.location);
         setDescription(editProperty.description);
+        setIsAvailable(editProperty.status);
       }
     };
 
     initProperty();
-  }, [open]);
+  }, [open, editProperty]);
 
   return (
     <Dialog open={open} TransitionComponent={Transition} onClose={resetValues}>
@@ -178,11 +180,17 @@ export default function PropertyPopupModal() {
             <input
               className="p-2 my-3 mr-3 rounded"
               type="checkbox"
-              name="status"
-              value={!isAvailable ? 0 : 1}
+              name="status-checkbox"
+              value={isAvailable ? "on" : "off"}
               ref={statusRef}
               checked={isAvailable}
               onChange={() => setIsAvailable(!isAvailable)}
+            />
+            <input
+              className="p-2 my-3 mr-3 rounded"
+              type="hidden"
+              name="status"
+              value={isAvailable ? "on" : "off"}
             />
             <label htmlFor="status" className="text-dark dark:text-light">
               Is Available

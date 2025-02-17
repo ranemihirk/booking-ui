@@ -379,7 +379,7 @@ export async function fetchAllProperties() {
         propertyName: property.propertyName,
         maxOccupancy: property.maxOccupancy,
         location: property.location,
-        status: !property.status ? 0 : 1,
+        status: property.status,
         description: property.description,
       };
     });
@@ -410,7 +410,7 @@ export async function fetchProperty(propertyId ) {
             propertyName: property.propertyName,
             maxOccupancy: property.maxOccupancy,
             location: property.location,
-            status: !property.status ? 0 : 1,
+            status: !property.status,
             description: property.description,
           },
         },
@@ -433,12 +433,13 @@ export async function createProperty(formData) {
       description,
       status,
     } = Object.fromEntries(formData);
+    console.log('createProperty: ', formData);
     const propertyData = {
       id: propertyId,
       name: propertyName,
       maxOccupancy,
       location,
-      status: status,
+      status: status == 'off' ? false : true,
       description,
     };
 
@@ -455,7 +456,7 @@ export async function createProperty(formData) {
             maxOccupancy,
             description,
             location,
-            status: status == 0 ? false : true,
+            status: status == 'off' ? false : true,
             updatedAt: new Date(),
           },
         }
@@ -473,7 +474,7 @@ export async function createProperty(formData) {
         maxOccupancy,
         description,
         location,
-        status: status == 0 ? false : true,
+        status: status == 'off' ? false : true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

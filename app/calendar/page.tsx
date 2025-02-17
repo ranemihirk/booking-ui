@@ -35,7 +35,7 @@ export default function Calendar() {
       <div className="container py-4 xl:py-8">
         <div className="flex justify-evenly">
           <Button
-            className="hidden capitalize text-light border-light"
+            className="xl:hidden capitalize text-light border-light"
             variant="contained"
             onClick={handleClick}
           >
@@ -49,8 +49,8 @@ export default function Calendar() {
             Delete All Events
           </Button>
         </div>
-        <div className="flex gap-4 h-full text-light py-4 xl:py-8">
-          <div className="w-[30%] border border-dark/10 dark:border-light/10 shadow-md dark:shadow-light/50 p-4">
+        <div className="flex flex-col xl:flex-row gap-4 h-full text-light py-4 xl:py-8">
+          <div className="w-full xl:w-[30%] border border-dark/10 dark:border-light/10 xl:shadow-md dark:shadow-light/50 xl:p-4">
             <PropertyList />
           </div>
           <div className="grow h-full text-dark dark:text-light">
