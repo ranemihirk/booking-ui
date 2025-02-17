@@ -8,6 +8,7 @@ import {
   SetStateAction,
 } from "react";
 import { useToastContext } from "@/contexts/ToastContext";
+import { usePropertyContext } from "@/contexts/PropertyContext";
 import { useCalendarContext } from "@/contexts/CalendarContext";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -32,9 +33,11 @@ const Transition = forwardRef(function Transition(
 
 export default function CalendarPopupModal() {
   const { createToast, updateToast } = useToastContext();
+  const { currentProperty } = usePropertyContext();
   const { open, eventInfo, setOpen, setEvents, setEventInfo } =
     useCalendarContext();
 
+  const propertyIdRef = useRef<HTMLInputElement>(null);
   const eventIdRef = useRef<HTMLInputElement>(null);
   const eventNameRef = useRef<HTMLInputElement>(null);
   const numberOfPeopleRef = useRef<HTMLInputElement>(null);
@@ -42,10 +45,9 @@ export default function CalendarPopupModal() {
   const startDateRef = useRef<HTMLInputElement>(null);
   const endDateRef = useRef<HTMLInputElement>(null);
   const commentsRef = useRef<HTMLInputElement>(null);
-  const createdAtRef = useRef<HTMLInputElement>(null);
-  const updatedAtRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState(null);
+  const [propertyId, setPropertyId] = useState("");
   const [eventId, setEventId] = useState("");
   const [eventTitle, setEventTitle] = useState("");
   const [numberOPeople, setNumberOPeople] = useState("");
@@ -115,7 +117,8 @@ export default function CalendarPopupModal() {
   useEffect(() => {
     if (!open || !eventInfo) return;
     const initEvent = async () => {
-      if (eventInfo) {
+      if (eventInfo && currentProperty) {
+        setPropertyId(currentProperty.id);
         setEventId(eventInfo.id);
         const result = await fetchEvent(eventInfo.id);
         console.log("eventInfo: ", eventInfo);
@@ -185,6 +188,13 @@ export default function CalendarPopupModal() {
             name="eventId"
             value={eventId}
             ref={eventIdRef}
+          />
+          <input
+            className="w-full h-8 p-2 my-3 rounded"
+            type="hidden"
+            name="propertyId"
+            value={propertyId}
+            ref={propertyIdRef}
           />
           <input
             className="w-full h-8 p-2 my-3 rounded"

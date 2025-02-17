@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import Button from "@mui/material/Button";
 import { deleteAllEvents } from "@/lib/redis";
 import { useToastContext } from "@/contexts/ToastContext";
+import { usePropertyContext } from "@/contexts/PropertyContext";
 import AddIcon from "@mui/icons-material/Add";
 
 const DefaultCalendar = dynamic(
@@ -20,9 +21,10 @@ const PropertyList = dynamic(
 
 export default function Calendar() {
   const { createToast } = useToastContext();
+  const { currentProperty, handleClick } = usePropertyContext();
 
   const handleDeleteAllEvents = async () => {
-    const result = await deleteAllEvents();
+    const result = await deleteAllEvents(currentProperty.id);
     if (result.message) {
       createToast(result.message.data, "success");
       // setEvents([]);
@@ -33,14 +35,14 @@ export default function Calendar() {
       <div className="container py-4 xl:py-8">
         <div className="flex justify-evenly">
           <Button
-            className="capitalize text-light border-light"
+            className="hidden capitalize text-light border-light"
             variant="contained"
-            onClick={handleDeleteAllEvents}
+            onClick={handleClick}
           >
             <AddIcon /> Add Property
           </Button>
           <Button
-            className="capitalize text-light border-light"
+            className={`${process.env.NODE_ENV == "production" && 'hidden'} capitalize text-light border-light`}
             variant="contained"
             onClick={handleDeleteAllEvents}
           >

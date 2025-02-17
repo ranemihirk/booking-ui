@@ -5,6 +5,7 @@ import "./../styles/global.css";
 import DefaultContextProvider from "@/contexts/DefaultContext";
 import AuthContextProvider, { useAuthContext } from "@/contexts/AuthContext";
 import ToastContextProvider from "@/contexts/ToastContext";
+import PropertyContextProvider from "@/contexts/PropertyContext";
 import CalendarContextProvider from "@/contexts/CalendarContext";
 import { ToastContainer } from "react-toastify";
 import Header from "@/components/Home/Header";
@@ -31,12 +32,14 @@ export default function RootLayout({
         <DefaultContextProvider>
           <AuthContextProvider>
             <ToastContextProvider>
-              <CalendarContextProvider>
-                <Header />
-                <main className="grow">{children}</main>
-                <Footer />
-                <ToastContainer />
-              </CalendarContextProvider>
+              <PropertyContextProvider>
+                <CalendarContextProvider>
+                  <Header />
+                  <main className="grow">{children}</main>
+                  <Footer />
+                  <ToastContainer />
+                </CalendarContextProvider>
+              </PropertyContextProvider>
             </ToastContextProvider>
           </AuthContextProvider>
         </DefaultContextProvider>

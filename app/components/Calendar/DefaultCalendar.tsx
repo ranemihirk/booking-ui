@@ -1,14 +1,21 @@
 "use client";
+import dynamic from "next/dynamic";
 import { useRef, useEffect } from "react";
-import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
 import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
 import CalendarPopupModal from "@/components/Calendar/CalendarPopupModal";
 import { fetchAllEvents } from "@/lib/redis";
+import { usePropertyContext } from "@/contexts/PropertyContext";
 import { useCalendarContext } from "@/contexts/CalendarContext";
 import CalendarPopover from "@/components/Calendar/CalendarPopover";
 
+// Import FullCalendar dynamically to disable SSR
+const FullCalendar = dynamic(() => import("@fullcalendar/react"), {
+  ssr: false,
+});
+
 export default function DefaultCalendar() {
+  const { currentProperty } = usePropertyContext();
   const {
     events,
     setEvents,
@@ -17,22 +24,22 @@ export default function DefaultCalendar() {
     handleDateSelection,
   } = useCalendarContext();
 
-  const calendarRef = useRef(null);
-
   useEffect(() => {
     const init = async () => {
-      const allEvents = await fetchAllEvents();
+      if (currentProperty) {
+        const allEvents = await fetchAllEvents(currentProperty.id);
 
-      if (allEvents.error) {
-        return;
-      }
+        if (allEvents.error) {
+          return;
+        }
 
-      if (allEvents.message) {
-        setEvents(allEvents.message.data);
+        if (allEvents.message) {
+          setEvents(allEvents.message.data);
+        }
       }
     };
     init();
-  }, []);
+  }, [currentProperty]);
 
   const renderEventContent = (event) => {
     return (
@@ -61,7 +68,6 @@ export default function DefaultCalendar() {
     <>
       <FullCalendar
         key={events.length}
-        ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         validRange={{

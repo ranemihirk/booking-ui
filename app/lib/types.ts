@@ -33,3 +33,12 @@ export type EventProp = {
   extendedProps: ExtendedProps;
   description?: string;
 };
+
+export type PropertyProp = {
+  id: string;
+  propertyName: string;
+  maxOccupancy: number;
+  location: string;
+  description?: string;
+  status: boolean;
+};
