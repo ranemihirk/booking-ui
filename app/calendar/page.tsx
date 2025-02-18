@@ -56,7 +56,6 @@ export default function Calendar() {
           <div className="grow h-full text-dark dark:text-light">
             <DefaultCalendar />
           </div>
-          {/* <div id="calender"></div> */}
         </div>
       </div>
     </Suspense>

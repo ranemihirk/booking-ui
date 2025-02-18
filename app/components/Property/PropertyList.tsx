@@ -1,23 +1,36 @@
 "use client";
-import { useState, useEffect, ChangeEvent } from "react";
+import dynamic from "next/dynamic";
+import { useState, useEffect, MouseEvent } from "react";
 import { useDefaultContext } from "@/contexts/DefaultContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { usePropertyContext } from "@/contexts/PropertyContext";
 import Button from "@mui/material/Button";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { faSquareCaretDown } from "@fortawesome/free-solid-svg-icons/faSquareCaretDown";
 import PropertyPopupModal from "@/components/Property/PropertyPopupModal";
 import { fetchAllProperties, deleteProperty } from "@/lib/redis";
 
+const FontAwesomeIcon = dynamic(
+  () =>
+    import("@fortawesome/react-fontawesome").then((mod) => mod.FontAwesomeIcon),
+  { ssr: false } // ✅ Prevents rehydration issues
+);
+
 export default function PropertyList() {
   const { isLargeScreen } = useDefaultContext();
+  const { user } = useAuthContext();
   const {
     properties,
     currentProperty,
-    editProperty,
     setOpen,
     setEditProperty,
     setCurrentProperty,
@@ -56,25 +69,30 @@ export default function PropertyList() {
 
   const [value, setValue] = useState(0);
 
-  const handleChange = (event: ChangeEvent, newValue: number) => {
-    const target = event.target as HTMLElement;
+  const handleChange = (propertyId: string, newValue: number) => {
     setValue(newValue);
-    handlePropertySelectClick(target.id);
+    handlePropertySelectClick(propertyId);
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent) => {
+    handlePropertySelectClick(event.target.value as string);
   };
 
   useEffect(() => {
     const init = async () => {
-      const allProperties = await fetchAllProperties();
+      if (user) {
+        const allProperties = await fetchAllProperties(user.id);
 
-      if (allProperties.error) {
-        return;
-      }
-
-      if (allProperties.message) {
-        if (allProperties.message.data.length > 0) {
-          setCurrentProperty(allProperties.message.data[0]);
+        if (allProperties.error) {
+          return;
         }
-        setProperties(allProperties.message.data);
+
+        if (allProperties.message) {
+          if (allProperties.message.data.length > 0) {
+            setCurrentProperty(allProperties.message.data[0]);
+          }
+          setProperties(allProperties.message.data);
+        }
       }
     };
     init();
@@ -82,22 +100,26 @@ export default function PropertyList() {
 
   return (
     <div className="border border-dark/10 dark:border-light/10 h-full xl:px-2">
-      <Tabs
-        orientation={isLargeScreen ? "vertical" : "horizontal"}
-        variant="scrollable"
-        value={value}
-        onChange={handleChange}
-        aria-label="Vertical tabs example"
-        sx={{ borderRight: 1, borderColor: "divider" }}
-      >
-        {properties && properties.length > 0 ? (
-          properties.map((property, key) => (
-            <Tab
-            key={property.id}
-              label={property.propertyName}
-              id={property.id}
-              icon={
-                <div>
+      {isLargeScreen ? (
+        <List
+          component="nav"
+          aria-label="main mailbox folders"
+          className="text-dark dark:text-light"
+        >
+          {properties && properties.length > 0 ? (
+            properties.map((property, key) => (
+              <ListItemButton
+                key={property.id}
+                id={property.id}
+                selected={value == key}
+                onClick={() => handleChange(property.id, key)}
+                className={`${
+                  value == key &&
+                  "bg-dark/10 dark:bg-light/10 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-1 after:w-full xl:after:top-0 xl:after:right-0 xl:after:bottom-auto xl:after:left-auto xl:after:h-full xl:after:w-1 after:bg-blue"
+                }`}
+              >
+                <ListItemText primary={property.propertyName} />
+                <ListItemIcon>
                   <IconButton
                     edge="end"
                     aria-label="edit"
@@ -114,18 +136,40 @@ export default function PropertyList() {
                   >
                     <DeleteIcon />
                   </IconButton>
-                </div>
-              }
-              iconPosition="end"
-              className={`rounded ${
-                key === value && "bg-dark/10 dark:bg-light/10"
-              } justify-between border border-light/20 text-dark dark:text-light hover:bg-dark/20 dark:hover:bg-light/20 cursor-pointer`}
-            />
-          ))
-        ) : (
-          <Tab label="No Properties Found!" />
-        )}
-      </Tabs>
+                </ListItemIcon>
+              </ListItemButton>
+            ))
+          ) : (
+            <ListItemButton key="no-properties" id="no-properties">
+              <ListItemText primary="No Properties Found!" />
+            </ListItemButton>
+          )}
+        </List>
+      ) : properties && properties.length > 0 ? (
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={currentProperty.id}
+          label="Properties"
+          onChange={handleSelectChange}
+          className="w-full text-dark dark:text-light"
+          MenuProps={{
+            classes: { paper: "bg-light dark:bg-dark text-dark dark:text-light" },
+          }}
+          IconComponent={(props) => (
+            <FontAwesomeIcon icon={faSquareCaretDown} className="mr-4" />
+          )}
+        >
+          {properties.map((property, key) => (
+            <MenuItem key={key} value={property.id}>
+              {property.propertyName}
+            </MenuItem>
+          ))}
+        </Select>
+      ) : (
+        <h3>No Properties</h3>
+      )}
+
       <Button
         className="hidden xl:inline-flex w-full capitalize text-dark dark:text-light border-light bg-dark/10 hover:bg-dark/30 dark:bg-light/10 hover:dark:bg-light/30"
         variant="contained"

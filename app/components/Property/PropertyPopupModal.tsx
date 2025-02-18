@@ -59,7 +59,7 @@ export default function PropertyPopupModal() {
       const { propertyId } = Object.fromEntries(formData);
       const isNewproperty = propertyId == "";
       const response = await createProperty(formData);
-      console.log("response: ", response);
+      
       if (response.error) {
         console.log(response.error, typeof response.error);
         setError(response.error);
@@ -94,7 +94,7 @@ export default function PropertyPopupModal() {
           }
         });
         console.log("Property Added Successful.");
-        updateToast("Property Added Successful.", "success", toastId);
+        updateToast(`Property ${editProperty ? "Edited" : "Added"} Successful.`, "success", toastId);
       }
     }
   }
@@ -111,8 +111,9 @@ export default function PropertyPopupModal() {
   useEffect(() => {
     if (!open) return;
     const initProperty = async () => {
+      if (!user) return;
+      setUserId(user.id);
       if (editProperty) {
-        setUserId(user.id);
         setPropertyId(editProperty.id);
         setPropertyTitle(editProperty.propertyName);
         setMaxOccupancy(editProperty.maxOccupancy.toString());
@@ -123,7 +124,7 @@ export default function PropertyPopupModal() {
     };
 
     initProperty();
-  }, [open, editProperty]);
+  }, [open]);
 
   return (
     <Dialog open={open} TransitionComponent={Transition} onClose={resetValues}>

@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
   compiler: {
     styledComponents: true,
   },
+  webpack: (config, { isServer }) => {
+    // Fix for importing 'fs' or other Node.js modules in client components
+    if (!isServer) {
+      config.resolve.fallback = { fs: false };
+    }
+
+    // Ensure TypeScript files are properly resolved
+    config.resolve.extensions.push('.ts', '.tsx');
+
+    return config;
+  },
 };
 
 export default nextConfig;

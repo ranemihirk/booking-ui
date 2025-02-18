@@ -367,12 +367,12 @@ export async function deleteAllEvents(propertyId) {
 
 // Property
 
-export async function fetchAllProperties(userId="") {
+export async function fetchAllProperties(userId) {
   const client = await clientPromise;
   const db = client.db("booking");
   const collection = db.collection("properties");
 
-  const properties = await collection.find({}).toArray();
+  const properties = await collection.find({userId}).toArray();
   if (properties.length > 0) {
     const allProperties = properties.map((property) => {
       return {
